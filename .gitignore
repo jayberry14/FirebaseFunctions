@@ -64,3 +64,9 @@ node_modules/
 
 # dotenv environment variables file
 .env
+
+# editor settings
+.idea/
+
+# macOS
+.DS_Store
