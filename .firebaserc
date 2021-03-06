@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "ibc-wallet"
+    "default": "ibc-wallet",
+    "ibc-wallet-prod": "byui-ibc-wallet",
+    "ibc-wallet-dev": "ibc-wallet"
   }
 }
