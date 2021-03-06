@@ -70,3 +70,8 @@ node_modules/
 
 # macOS
 .DS_Store
+
+# never publish these folder!
+privateKeys/
+testDatabase/
+emulators.backup/
