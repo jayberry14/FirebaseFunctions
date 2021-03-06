@@ -42,3 +42,16 @@ exports.moveCompanyTest = functions.https.onRequest(async (req, res) => {
   }
   res.send('Successfully moved!')
 })
+
+
+/** Delete a user */
+exports.deleteUserTest = functions.https.onRequest(async (req, res) => {
+  try {
+    await utils.deleteUser(req.query.uid)
+  } catch(error) {
+    res.status(500)
+    res.send(error.message)
+    return
+  }
+  res.send('User successfully deleted!')
+})

@@ -3,16 +3,30 @@ const _ = require('lodash'); // JavaScript/Node.js library extension
 admin.initializeApp();
 
 
-/** Script archiving based on company creation date */
+/**
+ * Script archiving based on company creation date
+ * Also deletes the associated accounts
+ */
 const autoCompanyArchiverJob = async () => {
   // Get the companies
   const activeCompaniesRef = admin.firestore().collection('activeCompanies')
+  const accountsToDeleteRef = admin.firestore().collection('accounts')
   const activeCompaniesSnapshot = await activeCompaniesRef.where('contentUpdateCt', '>', 0).get()
 
   // Archive them
   activeCompaniesSnapshot.forEach(await (async (activeCompany) => {
     try {
       await moveCompany('activeCompanies', 'archivedCompanies', activeCompany.id)
+
+      // Delete the associated account
+      const accountToDeleteRef = accountsToDeleteRef.where('companyRef', '==', activeCompany.ref).limit(1)
+      const accountToDeleteSnapshot = await accountToDeleteRef.get()
+      accountToDeleteSnapshot.forEach(account => {
+        // Delete their data in Firestore
+        account.ref.delete()
+        // Delete the actual user from Auth
+        deleteUser(account.id)
+      })
     } catch (error) {
       console.error(`${error.code}: ${error.message}`)
     }
@@ -98,6 +112,25 @@ const moveCompany = async (fromCollection, moveToCollection, companyGUID) => {
 }
 
 
+/**
+ * Delete user by UID
+ * @param uid
+ * @returns {Promise<void>}
+ */
+const deleteUser = async (uid) => {
+  try {
+    await admin.auth().deleteUser(uid)
+  } catch (error) {
+    if (error.code === 'auth/user-not-found') {
+      console.log(`Unable to delete user '${uid}': ${error.message}`)
+      return
+    }
+    throw error
+  }
+}
+
+
 exports.autoCompanyArchiverJob = autoCompanyArchiverJob;
 exports.weeklyUpdateCompaniesRankJob = weeklyUpdateCompaniesRankJob;
 exports.moveCompany = moveCompany;
+exports.deleteUser = deleteUser;

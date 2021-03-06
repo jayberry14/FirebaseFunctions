@@ -4,9 +4,8 @@
     "indexes": "firestore.indexes.json"
   },
   "emulators": {
-    "pubsub": {
-      "host": "localhost",
-      "port": 8085
+    "auth": {
+      "port": "9099"
     }
   }
 }
