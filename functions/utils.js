@@ -56,6 +56,7 @@ const weeklyUpdateCompaniesRankJob = async () => {
       return null;
     }
 
+    // Update the rank
     companiesSnapshot.forEach(companySnapshot => {
       const company = companySnapshot.data()
 
@@ -64,6 +65,19 @@ const weeklyUpdateCompaniesRankJob = async () => {
         rank: (rating/5+1) * (company.pageVisitsCt*0.7 + company.contentUpdateCt*0.3)
       })
     })
+
+    // Update the 'topCompanyCt' and 'top4Ct' fields respectively
+    companiesRef.orderBy('rank', 'desc').limit(4).get().then(snapshot => {
+      let i = 0
+      snapshot.forEach(topCompany => {
+        if (i === 0) {
+          topCompany.ref.update({ topCompanyCt: admin.firestore.FieldValue.increment(1) })
+        }
+        topCompany.ref.update({ top4Ct: admin.firestore.FieldValue.increment(1) })
+        i++
+      })
+    })
+
     return null;
   } catch (error) {
     console.error("Unable to update companies' rank: ", error)
